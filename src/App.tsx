@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import LandingPage from './components/LandingPage';
 import AssessmentForm from './components/AssessmentForm';
 import ResultsPage from './components/ResultsPage';
@@ -10,6 +10,7 @@ function App() {
         <Route path="/" element={<LandingPage />} />
         <Route path="/assessment" element={<AssessmentForm />} />
         <Route path="/results" element={<ResultsPage />} />
+        <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </BrowserRouter>
   );

@@ -8,15 +8,15 @@ export default {
     extend: {
       colors: {
         'navy': {
-          900: '#0a1628',
-          800: '#0f1f3a',
-          700: '#152844',
+          900: '#1e293b',
+          800: '#273548',
+          700: '#334155',
         },
-        'sky-blue': '#00d4ff',
-        'gold': '#ffd700',
+        'sky-blue': '#0ea5e9',
+        'gold': '#f59e0b',
       },
       backgroundImage: {
-        'gradient-navy': 'linear-gradient(135deg, #0a1628 0%, #152844 100%)',
+        'gradient-navy': 'linear-gradient(135deg, #1e293b 0%, #334155 100%)',
       },
     },
   },

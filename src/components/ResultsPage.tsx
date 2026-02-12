@@ -30,6 +30,26 @@ export default function ResultsPage() {
     performAnalysis();
   }, [assessmentData, analysisResult, setAnalysisResult, setIsAnalyzing]);
 
+  if (!assessmentData.companyName) {
+    return (
+      <div className="min-h-screen bg-gradient-navy text-white flex items-center justify-center p-4">
+        <div className="glass-strong rounded-2xl p-8 max-w-md text-center">
+          <FaExclamationTriangle className="w-16 h-16 text-yellow-400 mx-auto mb-4" />
+          <h2 className="text-2xl font-bold mb-4">Assessment Not Found</h2>
+          <p className="text-gray-300 mb-6">
+            We couldn&apos;t find a completed assessment. Please complete the assessment to view results.
+          </p>
+          <button
+            onClick={() => navigate('/assessment')}
+            className="bg-sky-blue hover:bg-sky-blue/90 text-navy-900 font-bold px-6 py-3 rounded-lg"
+          >
+            Go to Assessment
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   const handleDownloadPDF = async () => {
     if (!analysisResult) return;
 

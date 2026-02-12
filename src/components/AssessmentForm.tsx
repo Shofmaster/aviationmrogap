@@ -1,7 +1,10 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
+import { SignedOut, useUser } from '@clerk/clerk-react';
 import { useAssessmentStore } from '../store/assessmentStore';
 import { FaChevronLeft, FaChevronRight, FaCheck } from 'react-icons/fa';
+import type { AssessmentData } from '../types/assessment';
+import { calculateOverallProgress, calculateSectionCompletion, isFieldFilled } from '../utils/assessmentProgress';
 import CompanyInfoSection from './sections/CompanyInfoSection';
 import CertificationsSection from './sections/CertificationsSection';
 import AircraftServicesSection from './sections/AircraftServicesSection';
@@ -32,18 +35,37 @@ const SECTIONS = [
   { id: 12, title: 'Metrics & Financials', component: MetricsFinancialsSection },
 ];
 
+const REQUIRED_FIELDS: Record<number, (keyof AssessmentData)[]> = {
+  0: ['companyName', 'location', 'contactName', 'contactEmail'],
+};
+
+function isSectionValid(data: Partial<AssessmentData>, sectionId: number): boolean {
+  const requiredFields = REQUIRED_FIELDS[sectionId];
+  if (!requiredFields || requiredFields.length === 0) return true;
+  return requiredFields.every((field) => isFieldFilled(data[field]));
+}
+
+const ADMIN_EMAIL = 'shelby.hofmaster.cap@gmail.com';
+
 export default function AssessmentForm() {
   const navigate = useNavigate();
   const { currentStep, setCurrentStep, assessmentData, updateAssessmentData } = useAssessmentStore();
   const [localData, setLocalData] = useState(assessmentData);
+  const { user } = useUser();
+
+  const isAdmin = user?.primaryEmailAddress?.emailAddress === ADMIN_EMAIL;
 
   const CurrentSectionComponent = SECTIONS[currentStep]?.component;
   const isLastStep = currentStep === SECTIONS.length - 1;
 
+  // Merge localData with store data for accurate progress calculation
+  const mergedData = { ...assessmentData, ...localData };
+  const progressPercentage = calculateOverallProgress(mergedData);
+  const isCurrentStepValid = isAdmin || isSectionValid(mergedData, currentStep);
+
   const handleNext = () => {
     updateAssessmentData(localData);
     if (isLastStep) {
-      // Navigate to results/analysis page
       navigate('/results');
     } else {
       setCurrentStep(currentStep + 1);
@@ -56,11 +78,13 @@ export default function AssessmentForm() {
   };
 
   const handleSectionClick = (sectionId: number) => {
+    // Block navigation past Company Info if required fields aren't filled (admin can skip)
+    if (!isAdmin && sectionId > 0 && !isSectionValid(mergedData, 0)) {
+      return;
+    }
     updateAssessmentData(localData);
     setCurrentStep(sectionId);
   };
-
-  const progressPercentage = ((currentStep + 1) / SECTIONS.length) * 100;
 
   return (
     <div className="min-h-screen bg-gradient-navy text-white">
@@ -68,10 +92,19 @@ export default function AssessmentForm() {
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold mb-2 gradient-text" style={{ fontFamily: 'Poppins, sans-serif' }}>
-            Aviation Quality Assessment
+            AeroGap Assessment
           </h1>
           <p className="text-gray-400">Complete all sections for comprehensive gap analysis</p>
         </div>
+
+        {/* Sign-in reminder for guests */}
+        <SignedOut>
+          <div className="mb-6 bg-sky-blue/10 border border-sky-blue/30 rounded-lg px-4 py-3 flex items-center justify-between">
+            <p className="text-sm text-gray-300">
+              Want to save your progress? <Link to="/sign-up" className="text-sky-blue hover:underline font-medium">Create a free account</Link> or <Link to="/sign-in" className="text-sky-blue hover:underline font-medium">sign in</Link>.
+            </p>
+          </div>
+        </SignedOut>
 
         {/* Progress Bar */}
         <div className="mb-8">
@@ -93,24 +126,37 @@ export default function AssessmentForm() {
             <div className="glass rounded-xl p-4 sticky top-8">
               <h3 className="text-sm font-semibold mb-4 text-gray-400">Sections</h3>
               <div className="space-y-2">
-                {SECTIONS.map((section) => (
-                  <button
-                    key={section.id}
-                    onClick={() => handleSectionClick(section.id)}
-                    className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-all ${
-                      currentStep === section.id
-                        ? 'bg-sky-blue text-navy-900 font-semibold'
-                        : 'hover:bg-white/10 text-gray-300'
-                    }`}
-                  >
-                    <div className="flex items-center gap-2">
-                      {currentStep > section.id && (
-                        <FaCheck className="w-3 h-3 text-green-400" />
-                      )}
-                      <span className="flex-1">{section.title}</span>
-                    </div>
-                  </button>
-                ))}
+                {SECTIONS.map((section) => {
+                  const completion = calculateSectionCompletion(mergedData, section.id);
+                  const isComplete = completion === 1;
+                  const isPartial = completion > 0 && completion < 1;
+                  const isLocked = !isAdmin && section.id > 0 && !isSectionValid(mergedData, 0);
+
+                  return (
+                    <button
+                      key={section.id}
+                      onClick={() => handleSectionClick(section.id)}
+                      disabled={isLocked}
+                      className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-all ${
+                        isLocked
+                          ? 'opacity-50 cursor-not-allowed text-gray-500'
+                          : currentStep === section.id
+                          ? 'bg-sky-blue text-navy-900 font-semibold'
+                          : 'hover:bg-white/10 text-gray-300'
+                      }`}
+                    >
+                      <div className="flex items-center gap-2">
+                        {isComplete && currentStep !== section.id && (
+                          <FaCheck className="w-3 h-3 text-green-400 flex-shrink-0" />
+                        )}
+                        {isPartial && !isComplete && currentStep !== section.id && (
+                          <div className="w-3 h-3 rounded-full border-2 border-yellow-400 flex-shrink-0" />
+                        )}
+                        <span className="flex-1">{section.title}</span>
+                      </div>
+                    </button>
+                  );
+                })}
               </div>
             </div>
           </div>
@@ -144,7 +190,12 @@ export default function AssessmentForm() {
 
                 <button
                   onClick={handleNext}
-                  className="flex items-center gap-2 px-6 py-3 rounded-lg font-semibold bg-sky-blue hover:bg-sky-blue/90 text-navy-900 transition-all"
+                  disabled={!isCurrentStepValid}
+                  className={`flex items-center gap-2 px-6 py-3 rounded-lg font-semibold transition-all ${
+                    isCurrentStepValid
+                      ? 'bg-sky-blue hover:bg-sky-blue/90 text-navy-900'
+                      : 'bg-gray-600 text-gray-300 cursor-not-allowed'
+                  }`}
                 >
                   {isLastStep ? (
                     <>
@@ -159,6 +210,11 @@ export default function AssessmentForm() {
                   )}
                 </button>
               </div>
+              {!isCurrentStepValid && (
+                <p className="text-sm text-red-300 mt-3">
+                  Please complete all required fields before continuing.
+                </p>
+              )}
             </div>
           </div>
         </div>

@@ -12,17 +12,20 @@ export interface AssessmentData {
   certifications: string[];
   as9100Rev: string;
   argusLevel: string;
+  isbaoStage: string;
+  wyvernLevel: string;
 
   // Aircraft & Services
   aircraftCategories: string[];
   specificAircraftTypes: string;
   servicesOffered: string[];
-  operationsScope: string;
+  mechanicCount: string;
+  hangarCapabilities: string;
   oemAuthorizations: string[];
   specialCapabilities: string[];
 
   // Software & Tracking
-  maintenanceTrackingSoftware: string;
+  maintenanceTrackingSoftware: string[];
   softwareSatisfaction: string;
 
   // Process Management
@@ -54,6 +57,7 @@ export interface AssessmentData {
   challenges: string[];
 
   // Training
+  trainingPrograms: string[];
   trainingProgramType: string;
   trainingTracking: string;
   initialTrainingDuration: string;
@@ -77,6 +81,7 @@ export interface AssessmentData {
 
   // Regulatory & Audit
   lastFAASurveillance: string;
+  auditSurveillance: Record<string, string>;
   auditFindingsCount: string;
   findingSeverity: string;
   recurringFindings: string;

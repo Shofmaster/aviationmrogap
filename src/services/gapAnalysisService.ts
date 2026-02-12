@@ -1,5 +1,64 @@
 import type { AssessmentData, GapAnalysisResult, Gap, Recommendation } from '../types/assessment';
 
+function normalizeValue(value?: string | null): string {
+  return (value || '').trim().toLowerCase();
+}
+
+function parsePercent(value?: string): number | null {
+  if (!value) return null;
+  const normalized = value.replace(/%/g, '').trim();
+  if (!normalized || normalized.toLowerCase().includes('unknown')) return null;
+
+  const rangeMatch = normalized.match(/^(\d+(\.\d+)?)\s*-\s*(\d+(\.\d+)?)$/);
+  if (rangeMatch) {
+    const low = parseFloat(rangeMatch[1]);
+    const high = parseFloat(rangeMatch[3]);
+    if (Number.isFinite(low) && Number.isFinite(high)) {
+      return (low + high) / 2;
+    }
+  }
+
+  const numeric = parseFloat(normalized);
+  return Number.isFinite(numeric) ? numeric : null;
+}
+
+function parseMoney(value?: string): number | null {
+  if (!value) return null;
+  const normalized = value.replace(/[$,]/g, '').trim();
+  if (!normalized || normalized.toLowerCase().includes('unknown')) return null;
+
+  const matches = [...normalized.matchAll(/(\d+(\.\d+)?)(\s*[mk])?/gi)];
+  if (matches.length === 0) return null;
+
+  const values = matches.map((match) => {
+    const num = parseFloat(match[1]);
+    const suffix = match[3]?.trim().toLowerCase();
+    if (!Number.isFinite(num)) return null;
+    if (suffix === 'm') return num * 1_000_000;
+    if (suffix === 'k') return num * 1_000;
+    return num;
+  }).filter((num): num is number => num !== null);
+
+  if (values.length === 0) return null;
+  const sum = values.reduce((acc, current) => acc + current, 0);
+  return sum / values.length;
+}
+
+function mapOverdueCalibrations(value?: string): number | null {
+  switch (value) {
+    case 'None':
+      return 0;
+    case '1-3 Items':
+      return 2;
+    case '4-10 Items':
+      return 7;
+    case 'More than 10':
+      return 11;
+    default:
+      return null;
+  }
+}
+
 export async function analyzeAssessment(data: Partial<AssessmentData>): Promise<GapAnalysisResult> {
   // Simulate analysis delay
   await new Promise(resolve => setTimeout(resolve, 2000));
@@ -22,22 +81,83 @@ export async function analyzeAssessment(data: Partial<AssessmentData>): Promise<
     scoreDeductions += 20;
   }
 
+  // Analyze IS-BAO Stage
+  if (data.certifications?.includes('IS-BAO') && (!data.isbaoStage || data.isbaoStage === 'N/A')) {
+    gaps.push({
+      id: 'cert-isbao-1',
+      category: 'Certifications & Compliance',
+      severity: 'medium',
+      title: 'IS-BAO Stage Not Defined',
+      description: 'Organization claims IS-BAO certification but has not specified the audit stage.',
+      impact: 'Unable to benchmark safety management maturity against IS-BAO framework.',
+      recommendation: 'Determine current IS-BAO stage and develop a roadmap to progress to Stage 3 (Continual Improvement).',
+    });
+    scoreDeductions += 3;
+  } else if (data.isbaoStage === 'Stage 1') {
+    gaps.push({
+      id: 'cert-isbao-2',
+      category: 'Certifications & Compliance',
+      severity: 'medium',
+      title: 'IS-BAO Stage 1 - Foundation Level Only',
+      description: 'Organization is at IS-BAO Stage 1 (Foundation), which represents initial SMS implementation.',
+      impact: 'Stage 1 demonstrates commitment but lacks the mature safety culture of Stage 2 and 3 operators.',
+      recommendation: 'Develop plan to advance to IS-BAO Stage 2 by strengthening safety reporting, risk management, and safety assurance processes.',
+    });
+    scoreDeductions += 3;
+  }
+
+  // Analyze Wyvern Rating
+  if (data.certifications?.includes('Wyvern Wingman') && (!data.wyvernLevel || data.wyvernLevel === 'N/A')) {
+    gaps.push({
+      id: 'cert-wyvern-1',
+      category: 'Certifications & Compliance',
+      severity: 'low',
+      title: 'Wyvern Rating Not Specified',
+      description: 'Organization references Wyvern but has not specified the rating level.',
+      impact: 'Cannot assess third-party safety audit status.',
+      recommendation: 'Clarify current Wyvern rating status (Wingman or Registered).',
+    });
+    scoreDeductions += 2;
+  }
+
   // Analyze Quality Systems
-  if (data.capaSystemStatus === 'No formal CAPA system' || data.capaSystemStatus === 'Limited tracking') {
+  if (data.capaSystemStatus === 'None') {
     gaps.push({
       id: 'quality-1',
       category: 'Quality Systems',
-      severity: data.capaSystemStatus === 'No formal CAPA system' ? 'critical' : 'high',
+      severity: 'critical',
       title: 'Inadequate CAPA System',
       description: 'Corrective and Preventive Action system is insufficient for regulatory compliance and continuous improvement.',
       impact: 'Risk of recurring quality issues, audit findings, and potential certificate action by FAA.',
       recommendation: 'Implement a formal CAPA system with root cause analysis, effectiveness checks, and closure verification.',
     });
-    scoreDeductions += data.capaSystemStatus === 'No formal CAPA system' ? 15 : 10;
+    scoreDeductions += 15;
+  } else if (data.capaSystemStatus === 'Partially Implemented' || data.capaSystemStatus === 'In Development') {
+    gaps.push({
+      id: 'quality-1',
+      category: 'Quality Systems',
+      severity: 'high',
+      title: 'CAPA System Needs Maturity',
+      description: 'CAPA system is not fully implemented or still in development.',
+      impact: 'Risk of recurring quality issues and delayed corrective action effectiveness.',
+      recommendation: 'Complete CAPA implementation with root cause analysis, effectiveness checks, and closure verification.',
+    });
+    scoreDeductions += 10;
+  } else if (data.capaSystemStatus === 'Implemented') {
+    gaps.push({
+      id: 'quality-1',
+      category: 'Quality Systems',
+      severity: 'medium',
+      title: 'CAPA System Needs Improvement',
+      description: 'CAPA system is implemented but still requires improvements to ensure consistent effectiveness.',
+      impact: 'Potential for recurring issues if CAPA effectiveness is not verified.',
+      recommendation: 'Strengthen CAPA effectiveness checks, management review, and closure verification.',
+    });
+    scoreDeductions += 6;
   }
 
   // Analyze Training
-  if (!data.trainingProgramType || data.trainingProgramType === 'Informal on-the-job training') {
+  if (!data.trainingProgramType || data.trainingProgramType === 'OJT Only' || data.trainingProgramType === 'Minimal') {
     gaps.push({
       id: 'training-1',
       category: 'Training & Competency',
@@ -51,36 +171,48 @@ export async function analyzeAssessment(data: Partial<AssessmentData>): Promise<
   }
 
   // Analyze Calibration
-  if (data.calibrationProgram === 'No formal program' || parseInt(data.overdueCalibrations || '0') > 5) {
+  const overdueCount = mapOverdueCalibrations(data.overdueCalibrations);
+  if (data.calibrationProgram === 'No' || overdueCount !== null && overdueCount > 5) {
     gaps.push({
       id: 'calibration-1',
       category: 'Calibration & Equipment',
-      severity: data.calibrationProgram === 'No formal program' ? 'critical' : 'high',
+      severity: data.calibrationProgram === 'No' ? 'critical' : 'high',
       title: 'Calibration Program Deficiencies',
       description: 'Inadequate calibration program or excessive overdue calibrations (14 CFR §145.109).',
       impact: 'Risk of using out-of-tolerance equipment, leading to improper work and safety hazards.',
       recommendation: 'Establish formal calibration program with tracked intervals, vendor certifications, and overdue equipment lockout procedures.',
     });
-    scoreDeductions += data.calibrationProgram === 'No formal program' ? 15 : 8;
+    scoreDeductions += data.calibrationProgram === 'No' ? 15 : 8;
+  } else if (data.calibrationProgram === 'Partially') {
+    gaps.push({
+      id: 'calibration-2',
+      category: 'Calibration & Equipment',
+      severity: 'high',
+      title: 'Calibration Program Partially Implemented',
+      description: 'Calibration program exists but is not fully implemented or consistently followed.',
+      impact: 'Increased risk of out-of-tolerance tools and inconsistent compliance.',
+      recommendation: 'Formalize calibration procedures, tracking, and vendor controls to ensure full coverage.',
+    });
+    scoreDeductions += 8;
   }
 
   // Analyze Tool Control
-  if (data.toolControlMethod === 'No formal system' || data.toolControlErrors === 'Yes') {
+  if (data.toolControlMethod === 'None' || data.toolControlErrors === 'Yes') {
     gaps.push({
       id: 'tool-1',
       category: 'Tool Control & FOD',
-      severity: data.toolControlMethod === 'No formal system' ? 'high' : 'medium',
+      severity: data.toolControlMethod === 'None' ? 'high' : 'medium',
       title: 'Tool Control System Gaps',
       description: 'Inadequate tool control system with documented errors or missing tools.',
       impact: 'FOD risk, safety hazard, and potential for catastrophic failures if tools left in aircraft.',
       recommendation: 'Implement shadow boards, tool checkout system, and mandatory pre/post-flight tool accountability procedures.',
     });
-    scoreDeductions += data.toolControlMethod === 'No formal system' ? 10 : 5;
+    scoreDeductions += data.toolControlMethod === 'None' ? 10 : 5;
   }
 
   // Analyze Production Metrics
-  const firstPassRate = parseInt(data.firstPassRate?.replace('%', '') || '0');
-  if (firstPassRate < 85) {
+  const firstPassRate = parsePercent(data.firstPassRate);
+  if (firstPassRate !== null && firstPassRate < 85) {
     gaps.push({
       id: 'production-1',
       category: 'Production & Quality Metrics',
@@ -94,22 +226,22 @@ export async function analyzeAssessment(data: Partial<AssessmentData>): Promise<
   }
 
   // Analyze Audit Findings
-  if (data.recurringFindings === 'Yes, same issues found multiple times') {
+  if (data.recurringFindings === 'Yes' || data.recurringFindings === 'Some') {
     gaps.push({
       id: 'audit-1',
       category: 'Regulatory & Audit',
-      severity: 'critical',
+      severity: data.recurringFindings === 'Yes' ? 'critical' : 'high',
       title: 'Recurring Audit Findings',
-      description: 'Same issues found in multiple FAA surveillance visits indicates systemic CAPA failure.',
-      impact: 'High risk of certificate action. Demonstrates ineffective corrective action process.',
+      description: 'Issues found in multiple FAA surveillance visits indicate systemic CAPA weaknesses.',
+      impact: 'Increased risk of certificate action. Demonstrates ineffective corrective action process.',
       recommendation: 'Conduct root cause analysis on recurring findings. Implement systemic changes and verify effectiveness.',
     });
-    scoreDeductions += 15;
+    scoreDeductions += data.recurringFindings === 'Yes' ? 15 : 8;
   }
 
   // Analyze Financial Metrics
-  const jobMargin = parseInt(data.jobMargin?.replace('%', '') || '0');
-  if (jobMargin < 15) {
+  const jobMargin = parsePercent(data.jobMargin);
+  if (jobMargin !== null && jobMargin < 15) {
     gaps.push({
       id: 'financial-1',
       category: 'Financial Performance',
@@ -123,7 +255,8 @@ export async function analyzeAssessment(data: Partial<AssessmentData>): Promise<
   }
 
   // Generate Recommendations
-  if (data.turnoverRate && parseInt(data.turnoverRate.replace('%', '')) > 15) {
+  const turnoverRate = parsePercent(data.turnoverRate);
+  if (turnoverRate !== null && turnoverRate > 15) {
     recommendations.push({
       id: 'rec-1',
       priority: 'high',
@@ -135,7 +268,8 @@ export async function analyzeAssessment(data: Partial<AssessmentData>): Promise<
     });
   }
 
-  if (!data.maintenanceTrackingSoftware || data.softwareSatisfaction === 'Very dissatisfied' || data.softwareSatisfaction === 'Dissatisfied') {
+  const softwareSatisfaction = normalizeValue(data.softwareSatisfaction);
+  if (!data.maintenanceTrackingSoftware?.length || softwareSatisfaction === 'very dissatisfied' || softwareSatisfaction === 'dissatisfied') {
     recommendations.push({
       id: 'rec-2',
       priority: 'medium',
@@ -147,7 +281,13 @@ export async function analyzeAssessment(data: Partial<AssessmentData>): Promise<
     });
   }
 
-  if (data.partsInventoryMethod === 'Manual spreadsheets' || data.inventoryAccuracy !== 'Very accurate (95%+)') {
+  const inventoryMethod = data.partsInventoryMethod || '';
+  if (
+    inventoryMethod === 'Spreadsheet' ||
+    inventoryMethod === 'Manual/Paper' ||
+    inventoryMethod === 'Manual' ||
+    (data.inventoryAccuracy && data.inventoryAccuracy !== '95-100%')
+  ) {
     recommendations.push({
       id: 'rec-3',
       priority: 'medium',
@@ -175,8 +315,8 @@ export async function analyzeAssessment(data: Partial<AssessmentData>): Promise<
   // Calculate Potential Savings
   let potentialSavings = 0;
   if (data.annualRevenue) {
-    const revenue = parseFloat(data.annualRevenue.replace(/[^0-9.]/g, ''));
-    if (revenue > 0) {
+    const revenue = parseMoney(data.annualRevenue);
+    if (revenue !== null && revenue > 0) {
       // Estimate 10-20% savings from operational improvements
       potentialSavings = revenue * 0.15;
     }

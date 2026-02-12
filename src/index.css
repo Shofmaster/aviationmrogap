@@ -9,7 +9,7 @@
 
   color-scheme: light dark;
   color: rgba(255, 255, 255, 0.87);
-  background-color: #0a1628;
+  background-color: #1e293b;
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
@@ -25,7 +25,7 @@
 
 body {
   min-height: 100vh;
-  background: linear-gradient(135deg, #0a1628 0%, #152844 100%);
+  background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
 }
 
 #root {
@@ -34,26 +34,26 @@ body {
 
 @layer utilities {
   .glass {
-    background: rgba(255, 255, 255, 0.05);
+    background: rgba(255, 255, 255, 0.08);
     backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.15);
   }
 
   .glass-strong {
-    background: rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.14);
     backdrop-filter: blur(20px);
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.25);
   }
 
   .gradient-text {
-    background: linear-gradient(135deg, #00d4ff 0%, #0096ff 100%);
+    background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
   }
 
   .gradient-gold {
-    background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%);
+    background: linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;

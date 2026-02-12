@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npx vite build)",
+      "Bash(npx convex init --help:*)",
+      "Bash(npx convex --version)"
+    ]
+  }
+}

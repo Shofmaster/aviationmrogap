@@ -1,4 +1,27 @@
-import { SectionProps, FormField, TextInput, Select } from './FormComponents';
+import { SectionProps, FormField, MultiSelectDropdown, Select } from './FormComponents';
+
+const MRO_SOFTWARE_OPTIONS = [
+  { value: 'CORRIDOR', label: 'CORRIDOR' },
+  { value: 'CAMP Systems', label: 'CAMP Systems' },
+  { value: 'Traxxall', label: 'Traxxall' },
+  { value: 'ENVISION', label: 'ENVISION' },
+  { value: 'Quantum MX', label: 'Quantum MX' },
+  { value: 'Ramco Aviation', label: 'Ramco Aviation' },
+  { value: 'Swiss AviationSoftware AMOS', label: 'Swiss AviationSoftware AMOS' },
+  { value: 'Rusada ENVISION', label: 'Rusada ENVISION' },
+  { value: 'Maintenix', label: 'Maintenix' },
+  { value: 'AvSight', label: 'AvSight' },
+  { value: 'Flightdocs', label: 'Flightdocs' },
+  { value: 'ATP Aviation Hub', label: 'ATP Aviation Hub' },
+  { value: 'WinAir', label: 'WinAir' },
+  { value: 'EmpowerMX', label: 'EmpowerMX' },
+  { value: 'Aircraft Maintenance Systems (AMS)', label: 'Aircraft Maintenance Systems (AMS)' },
+  { value: 'QAV', label: 'QAV' },
+  { value: 'Excel / Spreadsheets', label: 'Excel / Spreadsheets' },
+  { value: 'Paper-Based', label: 'Paper-Based' },
+  { value: 'Custom / In-House', label: 'Custom / In-House' },
+  { value: 'None', label: 'None' },
+];
 
 const SATISFACTION_LEVELS = [
   { value: 'Very Satisfied', label: 'Very Satisfied' },
@@ -30,12 +53,13 @@ export default function SoftwareProcessSection({ data, updateData }: SectionProp
 
         <FormField
           label="Maintenance Tracking Software"
-          helpText="What system do you use for tracking maintenance activities?"
+          helpText="Select all software systems you use for tracking maintenance activities."
         >
-          <TextInput
-            value={data.maintenanceTrackingSoftware || ''}
-            onChange={(value) => updateData({ ...data, maintenanceTrackingSoftware: value })}
-            placeholder="e.g., CORRIDOR, ENVISION, Camp Systems, Excel, etc."
+          <MultiSelectDropdown
+            values={data.maintenanceTrackingSoftware || []}
+            onChange={(values) => updateData({ ...data, maintenanceTrackingSoftware: values })}
+            options={MRO_SOFTWARE_OPTIONS}
+            placeholder="Select software systems..."
           />
         </FormField>
 

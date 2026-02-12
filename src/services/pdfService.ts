@@ -12,9 +12,9 @@ export async function generatePDFReport(result: GapAnalysisResult): Promise<void
   const contentWidth = pageWidth - 2 * margin;
 
   // Colors
-  const navy = rgb(0.04, 0.09, 0.16);
-  const skyBlue = rgb(0, 0.83, 1);
-  const gold = rgb(1, 0.84, 0);
+  const navy = rgb(0.118, 0.161, 0.231);
+  const skyBlue = rgb(0.055, 0.647, 0.914);
+  const gold = rgb(0.961, 0.620, 0.043);
   const textColor = rgb(0.2, 0.2, 0.2);
   const grayText = rgb(0.5, 0.5, 0.5);
 
@@ -31,7 +31,7 @@ export async function generatePDFReport(result: GapAnalysisResult): Promise<void
     color: navy,
   });
 
-  page.drawText('Aviation Quality Assessment', {
+  page.drawText('AeroGap Assessment', {
     x: margin,
     y: yPosition,
     size: 32,
@@ -345,7 +345,7 @@ export async function generatePDFReport(result: GapAnalysisResult): Promise<void
   }
 
   // Footer on last page
-  page.drawText('© 2025 Aviation Quality Company | Confidential', {
+  page.drawText('© 2026 AeroGap | Confidential', {
     x: margin,
     y: 30,
     size: 8,
@@ -359,7 +359,7 @@ export async function generatePDFReport(result: GapAnalysisResult): Promise<void
   const url = URL.createObjectURL(blob);
   const link = document.createElement('a');
   link.href = url;
-  link.download = `${result.companyName.replace(/\s+/g, '_')}_Gap_Analysis_Report.pdf`;
+  link.download = `${sanitizeFileName(result.companyName || 'Gap_Analysis')}_Report.pdf`;
   link.click();
   URL.revokeObjectURL(url);
 }
@@ -383,4 +383,13 @@ function wrapText(text: string, maxWidth: number, font: any, fontSize: number): 
 
   if (currentLine) lines.push(currentLine);
   return lines;
+}
+
+function sanitizeFileName(name: string): string {
+  const cleaned = name
+    .replace(/[\s]+/g, '_')
+    .replace(/[^a-zA-Z0-9_-]/g, '')
+    .replace(/_+/g, '_')
+    .replace(/^_+|_+$/g, '');
+  return cleaned.length > 0 ? cleaned : 'Gap_Analysis';
 }

@@ -1,4 +1,54 @@
-import { SectionProps, FormField, Select, TextInput } from './FormComponents';
+import { SectionProps, FormField, Select, TextInput, MultiSelectDropdown } from './FormComponents';
+
+const TRAINING_PROGRAMS = [
+  // FAA / Regulatory Programs
+  { value: 'FAA Part 147 A&P School', label: 'FAA Part 147 A&P School' },
+  { value: 'FAA Part 65 IA Training', label: 'FAA Part 65 IA Authorization Training' },
+  { value: 'FAA AMT Awards Program', label: 'FAA AMT Awards / PACE Program' },
+  { value: 'FAA Safety Team (FAASTeam)', label: 'FAA Safety Team (FAASTeam)' },
+  // EASA Programs
+  { value: 'EASA Part 66 Type Training', label: 'EASA Part 66 Type Training' },
+  { value: 'EASA Part 145 Continuation Training', label: 'EASA Part 145 Continuation Training' },
+  // OEM Training Programs
+  { value: 'Boeing OEM Training', label: 'Boeing OEM Training' },
+  { value: 'Airbus OEM Training', label: 'Airbus OEM Training' },
+  { value: 'Bombardier OEM Training', label: 'Bombardier OEM Training' },
+  { value: 'Embraer OEM Training', label: 'Embraer OEM Training' },
+  { value: 'Gulfstream OEM Training', label: 'Gulfstream OEM Training' },
+  { value: 'Dassault OEM Training', label: 'Dassault OEM Training' },
+  { value: 'Textron Aviation OEM Training', label: 'Textron Aviation (Cessna/Beechcraft) OEM Training' },
+  { value: 'Pratt & Whitney Engine Training', label: 'Pratt & Whitney Engine Training' },
+  { value: 'GE Aviation Engine Training', label: 'GE Aviation Engine Training' },
+  { value: 'Rolls-Royce Engine Training', label: 'Rolls-Royce Engine Training' },
+  { value: 'Honeywell Training', label: 'Honeywell Aerospace Training' },
+  { value: 'Collins Aerospace Training', label: 'Collins Aerospace Training' },
+  // Industry Training Providers
+  { value: 'FlightSafety International', label: 'FlightSafety International' },
+  { value: 'CAE Training', label: 'CAE Training' },
+  { value: 'AOPA Training', label: 'AOPA Training Programs' },
+  { value: 'ARSA Training', label: 'ARSA (Aeronautical Repair Station Association) Training' },
+  { value: 'SAE International Training', label: 'SAE International Training' },
+  { value: 'ATA/ATEC Training', label: 'ATA/ATEC (Aviation Technician Education Council)' },
+  // Quality & Standards Training
+  { value: 'AS9100 / AS9110 Training', label: 'AS9100 / AS9110 Quality System Training' },
+  { value: 'ISO 9001 Training', label: 'ISO 9001 Quality Management Training' },
+  { value: 'Human Factors / MRM Training', label: 'Human Factors / MRM (Maintenance Resource Management)' },
+  { value: 'SMS Training', label: 'Safety Management System (SMS) Training' },
+  { value: 'OSHA Safety Training', label: 'OSHA Safety Training' },
+  { value: 'Hazmat / DG Training', label: 'Hazmat / Dangerous Goods Training' },
+  { value: 'NDT / NDE Training', label: 'NDT / NDE (Non-Destructive Testing) Training' },
+  { value: 'Lean / Six Sigma Training', label: 'Lean / Six Sigma Training' },
+  // Specialized / Other
+  { value: 'Avionics Systems Training', label: 'Avionics Systems Training' },
+  { value: 'Composites Repair Training', label: 'Composites Repair Training' },
+  { value: 'Corrosion Prevention Training', label: 'Corrosion Prevention & Control Training' },
+  { value: 'Fuel Tank Safety (CDCCL) Training', label: 'Fuel Tank Safety (CDCCL) Training' },
+  { value: 'EWIS Training', label: 'EWIS (Electrical Wiring Interconnection System) Training' },
+  { value: 'RII Training', label: 'RII (Required Inspection Items) Training' },
+  { value: 'ESD Training', label: 'ESD (Electrostatic Discharge) Training' },
+  { value: 'FOD Prevention Training', label: 'FOD Prevention Training' },
+  { value: 'In-House / Proprietary Program', label: 'In-House / Proprietary Program' },
+];
 
 const TRAINING_TYPES = [
   { value: 'Formal Program', label: 'Formal Structured Program' },
@@ -27,6 +77,18 @@ const VERIFICATION_METHODS = [
 export default function TrainingSection({ data, updateData }: SectionProps) {
   return (
     <div className="space-y-6">
+      <FormField
+        label="Training Programs Used"
+        helpText="Select all training programs your organization participates in"
+      >
+        <MultiSelectDropdown
+          values={data.trainingPrograms || []}
+          onChange={(values) => updateData({ ...data, trainingPrograms: values })}
+          options={TRAINING_PROGRAMS}
+          placeholder="Select training programs"
+        />
+      </FormField>
+
       <FormField
         label="Training Program Type"
         helpText="What type of training program do you have?"

@@ -1,4 +1,4 @@
-import { SectionProps, FormField, CheckboxGroup, TextInput, TextArea } from './FormComponents';
+import { SectionProps, FormField, Select, CheckboxGroup, TextInput, TextArea } from './FormComponents';
 
 const AIRCRAFT_CATEGORIES = [
   'Light Jets',
@@ -23,6 +23,15 @@ const SERVICES_OFFERED = [
   'NDT Services',
   'Aircraft Storage',
   'Pre-Buy Inspections'
+];
+
+const MECHANIC_COUNT_OPTIONS = [
+  { value: '1-5', label: '1–5 Mechanics' },
+  { value: '6-15', label: '6–15 Mechanics' },
+  { value: '16-30', label: '16–30 Mechanics' },
+  { value: '31-50', label: '31–50 Mechanics' },
+  { value: '51-100', label: '51–100 Mechanics' },
+  { value: '100+', label: '100+ Mechanics' },
 ];
 
 const SPECIAL_CAPABILITIES = [
@@ -73,13 +82,25 @@ export default function AircraftServicesSection({ data, updateData }: SectionPro
       </FormField>
 
       <FormField
-        label="Operations Scope"
-        helpText="Describe your operational capabilities and capacity"
+        label="Number of Mechanics"
+        helpText="Select the range that best describes your workforce size"
+      >
+        <Select
+          value={data.mechanicCount || ''}
+          onChange={(value) => updateData({ ...data, mechanicCount: value })}
+          options={MECHANIC_COUNT_OPTIONS}
+          placeholder="Select mechanic count range"
+        />
+      </FormField>
+
+      <FormField
+        label="Hangar Capabilities"
+        helpText="Describe your hangar facilities, capacity, and any special infrastructure"
       >
         <TextArea
-          value={data.operationsScope || ''}
-          onChange={(value) => updateData({ ...data, operationsScope: value })}
-          placeholder="e.g., 5 hangars, 20 technicians, can handle up to 10 aircraft simultaneously..."
+          value={data.hangarCapabilities || ''}
+          onChange={(value) => updateData({ ...data, hangarCapabilities: value })}
+          placeholder="e.g., 2 hangars, 30,000 sq ft total, can accommodate up to Gulfstream G650..."
           rows={3}
         />
       </FormField>

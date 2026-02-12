@@ -7,10 +7,14 @@ const YES_NO_OPTIONS = [
 ];
 
 const SMS_PROGRAMS = [
-  { value: 'IS-BAO', label: 'IS-BAO' },
-  { value: 'FAA SMS', label: 'FAA SMS' },
-  { value: 'ICAO SMS', label: 'ICAO SMS' },
-  { value: 'Custom Program', label: 'Custom Program' },
+  { value: 'IS-BAO', label: 'IS-BAO SMS' },
+  { value: 'FAA SMS', label: 'FAA SMS (14 CFR Part 5)' },
+  { value: 'ICAO SMS', label: 'ICAO Annex 19 SMS' },
+  { value: 'EASA SMS', label: 'EASA SMS (Part-ORO.GEN.200)' },
+  { value: 'IOSA SMS', label: 'IATA IOSA SMS' },
+  { value: 'IBAC IS-BAH', label: 'IBAC IS-BAH' },
+  { value: 'Military SMS', label: 'Military SMS Program' },
+  { value: 'Custom Program', label: 'Custom / Proprietary Program' },
   { value: 'None', label: 'None' },
   { value: 'N/A', label: 'Not Applicable' },
 ];

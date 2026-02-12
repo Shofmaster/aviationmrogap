@@ -49,19 +49,60 @@ const CERTIFICATE_ACTIONS = [
 ];
 
 export default function RegulatoryAuditSection({ data, updateData }: SectionProps) {
+  const selectedCertifications = data.certifications || [];
+  const auditSurveillance = data.auditSurveillance || {};
+  const hasSelectedCertifications = selectedCertifications.some((cert) => cert !== 'None');
+
+  const updateAuditSurveillance = (cert: string, value: string) => {
+    updateData({
+      ...data,
+      auditSurveillance: {
+        ...auditSurveillance,
+        [cert]: value,
+      },
+    });
+  };
+
   return (
     <div className="space-y-6">
-      <FormField
-        label="Last FAA Surveillance"
-        helpText="When was your last FAA surveillance/inspection?"
-      >
-        <Select
-          value={data.lastFAASurveillance || ''}
-          onChange={(value) => updateData({ ...data, lastFAASurveillance: value })}
-          options={SURVEILLANCE_TIMEFRAMES}
-          placeholder="Select timeframe"
-        />
-      </FormField>
+      {hasSelectedCertifications ? (
+        <div className="space-y-4">
+          <h3 className="text-sm font-semibold text-gray-200 border-b border-white/10 pb-2">
+            Last Audit / Surveillance by Certification
+          </h3>
+          <p className="text-xs text-gray-400">
+            Based on your selected certifications, when was your last audit or surveillance for each?
+          </p>
+          <div className="grid md:grid-cols-2 gap-4">
+            {selectedCertifications.filter(c => c !== 'None').map((cert) => (
+              <FormField
+                key={cert}
+                label={`${cert}`}
+                helpText={`Last audit/surveillance for ${cert}`}
+              >
+                <Select
+                  value={auditSurveillance[cert] || ''}
+                  onChange={(value) => updateAuditSurveillance(cert, value)}
+                  options={SURVEILLANCE_TIMEFRAMES}
+                  placeholder="Select timeframe"
+                />
+              </FormField>
+            ))}
+          </div>
+        </div>
+      ) : (
+        <FormField
+          label="Last FAA Surveillance"
+          helpText="When was your last FAA surveillance/inspection?"
+        >
+          <Select
+            value={data.lastFAASurveillance || ''}
+            onChange={(value) => updateData({ ...data, lastFAASurveillance: value })}
+            options={SURVEILLANCE_TIMEFRAMES}
+            placeholder="Select timeframe"
+          />
+        </FormField>
+      )}
 
       <FormField
         label="Audit Findings Count"

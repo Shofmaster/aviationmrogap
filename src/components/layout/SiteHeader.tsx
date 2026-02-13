@@ -31,9 +31,9 @@ export default function SiteHeader() {
           AeroGap
         </Link>
         <nav className="flex items-center gap-6">
-          <NavLink to="/about" className={navLinkClass}>
+          <Link to="/#about" className="text-gray-300 hover:text-white transition-colors text-sm font-medium">
             About
-          </NavLink>
+          </Link>
           <Link to="/#what-we-do" className="text-gray-300 hover:text-white transition-colors text-sm font-medium">
             What We Do
           </Link>

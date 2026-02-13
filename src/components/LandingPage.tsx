@@ -1,8 +1,17 @@
-import { useNavigate } from 'react-router-dom';
-import { FaCheckCircle, FaChartLine, FaFileAlt, FaClock, FaSearch, FaTools, FaShieldAlt, FaHandshake, FaRocket, FaClipboardList } from 'react-icons/fa';
+import { useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { FaCheckCircle, FaChartLine, FaFileAlt, FaClock, FaSearch, FaTools, FaShieldAlt, FaHandshake, FaRocket, FaClipboardList, FaEnvelope } from 'react-icons/fa';
 
 export default function LandingPage() {
   const navigate = useNavigate();
+  const location = useLocation();
+
+  // When arriving at /#about (e.g. from /about redirect), scroll to the section
+  useEffect(() => {
+    if (location.hash === '#about') {
+      document.getElementById('about')?.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [location.hash]);
 
   return (
     <div className="relative z-10 text-white">
@@ -38,12 +47,19 @@ export default function LandingPage() {
             <h2 className="text-3xl font-bold mb-6 text-center gradient-text" style={{ fontFamily: 'Poppins, sans-serif' }}>
               Who We Are
             </h2>
-            <p className="text-gray-300 text-center leading-relaxed mb-8 max-w-2xl mx-auto">
+            <p className="text-gray-400 text-center text-sm mb-4 max-w-2xl mx-auto">
+              AeroGap is a service of Aviation Quality Company.
+            </p>
+            <p className="text-gray-300 text-center leading-relaxed mb-4 max-w-2xl mx-auto">
               AeroGap is an aviation quality and compliance consulting practice focused on maintenance organizations worldwide.
               We work with repair stations, MROs, and flight departments to close gaps in regulatory compliance, quality systems, and operations —
               so you can reduce risk, stay audit-ready, and capture revenue you might be leaving on the table.
             </p>
-            <div className="grid md:grid-cols-3 gap-6 text-center">
+            <p className="text-gray-300 text-center leading-relaxed mb-4 max-w-2xl mx-auto">
+              Our process is designed to be efficient: you answer questions about your systems and practices, and we deliver a professional report that highlights gaps and actionable recommendations.
+              Whether you choose our free Quick-Check or the full assessment, you get confidential, practical insights to reduce risk, stay audit-ready, and optimize your operations.
+            </p>
+            <div className="grid md:grid-cols-3 gap-6 text-center mt-8">
               <div>
                 <p className="text-sky-blue font-bold text-lg mb-1">Repair Stations</p>
                 <p className="text-gray-400 text-sm">Part 145, EASA Part-145, and international equivalents</p>
@@ -244,6 +260,28 @@ export default function LandingPage() {
             Completely Confidential • Professional PDF Report
           </p>
         </div>
+
+        {/* Contact / Get in touch */}
+        <div id="contact" className="mt-20 scroll-mt-20">
+          <div className="glass rounded-2xl p-10 max-w-2xl mx-auto">
+            <h2 className="text-3xl font-bold mb-6 text-center gradient-text" style={{ fontFamily: 'Poppins, sans-serif' }}>
+              Get in Touch
+            </h2>
+            <p className="text-gray-400 text-center mb-6">
+              Questions about our assessments or consulting? Reach out.
+            </p>
+            <div className="flex flex-col items-center gap-4">
+              <a
+                href="mailto:info@aviationqualitycompany.com"
+                className="inline-flex items-center gap-3 text-sky-blue hover:text-sky-blue/90 font-medium transition-colors"
+              >
+                <FaEnvelope className="w-6 h-6 flex-shrink-0" />
+                info@aviationqualitycompany.com
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

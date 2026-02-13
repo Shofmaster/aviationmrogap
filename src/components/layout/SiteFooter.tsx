@@ -7,7 +7,7 @@ export default function SiteFooter() {
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-6 text-gray-400 text-sm">
           <p>&copy; {new Date().getFullYear()} AeroGap. All rights reserved.</p>
           <span className="hidden sm:inline text-gray-500">|</span>
-          <Link to="/about" className="hover:text-sky-blue transition-colors">
+          <Link to="/#about" className="hover:text-sky-blue transition-colors">
             About
           </Link>
           <span className="hidden sm:inline text-gray-500">|</span>

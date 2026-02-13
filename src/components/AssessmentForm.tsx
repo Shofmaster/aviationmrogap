@@ -5,6 +5,7 @@ import { useAssessmentStore } from '../store/assessmentStore';
 import { FaChevronLeft, FaChevronRight, FaCheck } from 'react-icons/fa';
 import type { AssessmentData } from '../types/assessment';
 import { calculateOverallProgress, calculateSectionCompletion, isFieldFilled } from '../utils/assessmentProgress';
+import DocumentUploadSection from './sections/DocumentUploadSection';
 import CompanyInfoSection from './sections/CompanyInfoSection';
 import CertificationsSection from './sections/CertificationsSection';
 import AircraftServicesSection from './sections/AircraftServicesSection';
@@ -20,23 +21,24 @@ import ProductionSection from './sections/ProductionSection';
 import MetricsFinancialsSection from './sections/MetricsFinancialsSection';
 
 const SECTIONS = [
-  { id: 0, title: 'Company Information', component: CompanyInfoSection },
-  { id: 1, title: 'Certifications & Standards', component: CertificationsSection },
-  { id: 2, title: 'Aircraft & Services', component: AircraftServicesSection },
-  { id: 3, title: 'Software & Processes', component: SoftwareProcessSection },
-  { id: 4, title: 'Parts & Inventory', component: PartsInventorySection },
-  { id: 5, title: 'Quality & Tool Control', component: QualityToolControlSection },
-  { id: 6, title: 'Safety Management System', component: SMSSection },
-  { id: 7, title: 'Training & Competency', component: TrainingSection },
-  { id: 8, title: 'Calibration Program', component: CalibrationSection },
-  { id: 9, title: 'CAPA System', component: CAPASection },
-  { id: 10, title: 'Regulatory & Audit', component: RegulatoryAuditSection },
-  { id: 11, title: 'Production Control', component: ProductionSection },
-  { id: 12, title: 'Metrics & Financials', component: MetricsFinancialsSection },
+  { id: 0, title: 'Upload Company Documents', component: DocumentUploadSection },
+  { id: 1, title: 'Company Information', component: CompanyInfoSection },
+  { id: 2, title: 'Certifications & Standards', component: CertificationsSection },
+  { id: 3, title: 'Aircraft & Services', component: AircraftServicesSection },
+  { id: 4, title: 'Software & Processes', component: SoftwareProcessSection },
+  { id: 5, title: 'Parts & Inventory', component: PartsInventorySection },
+  { id: 6, title: 'Quality & Tool Control', component: QualityToolControlSection },
+  { id: 7, title: 'Safety Management System', component: SMSSection },
+  { id: 8, title: 'Training & Competency', component: TrainingSection },
+  { id: 9, title: 'Calibration Program', component: CalibrationSection },
+  { id: 10, title: 'CAPA System', component: CAPASection },
+  { id: 11, title: 'Regulatory & Audit', component: RegulatoryAuditSection },
+  { id: 12, title: 'Production Control', component: ProductionSection },
+  { id: 13, title: 'Metrics & Financials', component: MetricsFinancialsSection },
 ];
 
 const REQUIRED_FIELDS: Record<number, (keyof AssessmentData)[]> = {
-  0: ['companyName', 'location', 'contactName', 'contactEmail'],
+  1: ['companyName', 'location', 'contactName', 'contactEmail'],
 };
 
 function isSectionValid(data: Partial<AssessmentData>, sectionId: number): boolean {
@@ -79,7 +81,7 @@ export default function AssessmentForm() {
 
   const handleSectionClick = (sectionId: number) => {
     // Block navigation past Company Info if required fields aren't filled (admin can skip)
-    if (!isAdmin && sectionId > 0 && !isSectionValid(mergedData, 0)) {
+    if (!isAdmin && sectionId > 1 && !isSectionValid(mergedData, 1)) {
       return;
     }
     updateAssessmentData(localData);
@@ -87,8 +89,7 @@ export default function AssessmentForm() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-navy text-white">
-      <div className="container mx-auto px-4 py-8 max-w-6xl">
+    <>
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold mb-2 gradient-text" style={{ fontFamily: 'Poppins, sans-serif' }}>
@@ -123,14 +124,14 @@ export default function AssessmentForm() {
         <div className="grid lg:grid-cols-4 gap-8">
           {/* Sidebar Navigation */}
           <div className="lg:col-span-1">
-            <div className="glass rounded-xl p-4 sticky top-8">
+            <div className="glass rounded-xl p-4 sticky top-24">
               <h3 className="text-sm font-semibold mb-4 text-gray-400">Sections</h3>
               <div className="space-y-2">
                 {SECTIONS.map((section) => {
                   const completion = calculateSectionCompletion(mergedData, section.id);
                   const isComplete = completion === 1;
                   const isPartial = completion > 0 && completion < 1;
-                  const isLocked = !isAdmin && section.id > 0 && !isSectionValid(mergedData, 0);
+                  const isLocked = !isAdmin && section.id > 1 && !isSectionValid(mergedData, 1);
 
                   return (
                     <button
@@ -218,7 +219,6 @@ export default function AssessmentForm() {
             </div>
           </div>
         </div>
-      </div>
-    </div>
+    </>
   );
 }

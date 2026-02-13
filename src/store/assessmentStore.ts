@@ -37,6 +37,7 @@ const initialAssessmentData: Partial<AssessmentData> = {
   productionBottlenecks: [],
   certificateActions: [],
   auditSurveillance: {},
+  uploadedDocuments: [],
 };
 
 export const useAssessmentStore = create<AssessmentStore>()(

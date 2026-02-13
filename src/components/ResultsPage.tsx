@@ -1,13 +1,17 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useMutation, useAction } from 'convex/react';
+import { api } from '../../convex/_generated/api';
 import { useAssessmentStore } from '../store/assessmentStore';
 import { analyzeAssessment } from '../services/gapAnalysisService';
-import { generatePDFReport } from '../services/pdfService';
+import { generatePDFReport, sanitizeFileName } from '../services/pdfService';
 import { FaCheckCircle, FaExclamationTriangle, FaDownload, FaHome } from 'react-icons/fa';
 import type { Gap, Recommendation } from '../types/assessment';
 
 export default function ResultsPage() {
   const navigate = useNavigate();
+  const generateUploadUrl = useMutation(api.pdfReports.generateUploadUrl);
+  const sendReportAndSave = useAction(api.sendReportEmail.sendReportAndSave);
   const { assessmentData, analysisResult, setAnalysisResult, setIsAnalyzing, setIsGeneratingPDF } = useAssessmentStore();
   const [error, setError] = useState<string | null>(null);
 
@@ -32,7 +36,7 @@ export default function ResultsPage() {
 
   if (!assessmentData.companyName) {
     return (
-      <div className="min-h-screen bg-gradient-navy text-white flex items-center justify-center p-4">
+      <div className="min-h-[60vh] flex items-center justify-center p-4">
         <div className="glass-strong rounded-2xl p-8 max-w-md text-center">
           <FaExclamationTriangle className="w-16 h-16 text-yellow-400 mx-auto mb-4" />
           <h2 className="text-2xl font-bold mb-4">Assessment Not Found</h2>
@@ -55,10 +59,31 @@ export default function ResultsPage() {
 
     try {
       setIsGeneratingPDF(true);
-      await generatePDFReport(analysisResult);
+
+      // Generate PDF (downloads locally and returns bytes)
+      const pdfBytes = await generatePDFReport(analysisResult);
+
+      // Upload to Convex storage
+      const uploadUrl = await generateUploadUrl();
+      const blob = new Blob([pdfBytes as BlobPart], { type: 'application/pdf' });
+      const uploadResponse = await fetch(uploadUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/pdf' },
+        body: blob,
+      });
+      const { storageId } = await uploadResponse.json();
+
+      // Trigger email + save metadata
+      const fileName = `${sanitizeFileName(analysisResult.companyName || 'Gap_Analysis')}_Report.pdf`;
+      await sendReportAndSave({
+        storageId,
+        companyName: analysisResult.companyName,
+        fileName,
+        overallScore: analysisResult.overallScore,
+      });
     } catch (err) {
-      console.error('PDF generation error:', err);
-      setError('Failed to generate PDF. Please try again.');
+      console.error('PDF generation/upload error:', err);
+      setError('Failed to generate or upload PDF. Please try again.');
     } finally {
       setIsGeneratingPDF(false);
     }
@@ -66,7 +91,7 @@ export default function ResultsPage() {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gradient-navy text-white flex items-center justify-center p-4">
+      <div className="min-h-[60vh] flex items-center justify-center p-4">
         <div className="glass-strong rounded-2xl p-8 max-w-md text-center">
           <FaExclamationTriangle className="w-16 h-16 text-red-400 mx-auto mb-4" />
           <h2 className="text-2xl font-bold mb-4">Analysis Error</h2>
@@ -84,7 +109,7 @@ export default function ResultsPage() {
 
   if (!analysisResult) {
     return (
-      <div className="min-h-screen bg-gradient-navy text-white flex items-center justify-center">
+      <div className="min-h-[60vh] flex items-center justify-center">
         <div className="text-center">
           <div className="animate-pulse-slow">
             <div className="w-16 h-16 border-4 border-sky-blue border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
@@ -100,8 +125,7 @@ export default function ResultsPage() {
   const highGaps = analysisResult.criticalGaps.filter(g => g.severity === 'high');
 
   return (
-    <div className="min-h-screen bg-gradient-navy text-white">
-      <div className="container mx-auto px-4 py-8 max-w-6xl">
+    <>
         {/* Header */}
         <div className="mb-8">
           <div className="flex items-center justify-between mb-4">
@@ -202,8 +226,7 @@ export default function ResultsPage() {
             Get your complete analysis with detailed findings and action plan
           </p>
         </div>
-      </div>
-    </div>
+    </>
   );
 }
 

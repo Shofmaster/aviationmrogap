@@ -120,6 +120,9 @@ export interface AssessmentData {
   // Other
   turnoverRate: string;
   specificConcerns: string;
+
+  // Full assessment: uploaded company files/manuals for analysis
+  uploadedDocuments?: { storageId: string; fileName: string }[];
 }
 
 export interface GapAnalysisResult {

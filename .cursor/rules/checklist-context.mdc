@@ -1,0 +1,16 @@
+---
+description: Checklist items run one per context; next item starts in a new chat after the previous is completed
+alwaysApply: true
+---
+
+# Checklist and Context Windows
+
+When working from a todo list or checklist:
+
+1. **One item per context.** Work on a single checklist item in this conversation. Do not start the next item in the same thread after completing one.
+
+2. **After completing an item:** Mark that item complete (e.g. via the todo tool), then tell the user to **start a new chat** for the next checklist item. For example: *"This item is done. Start a new conversation for the next checklist item so it gets a fresh context window."*
+
+3. **In a new chat:** If the user says they're continuing the checklist or names the next item, treat that as the only (or first) item to work on in that conversation. Do not carry over or batch multiple checklist items.
+
+This keeps each item’s context focused and avoids long threads where later items get lost or diluted.

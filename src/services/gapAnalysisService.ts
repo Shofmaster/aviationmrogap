@@ -322,6 +322,17 @@ export async function analyzeAssessment(data: Partial<AssessmentData>): Promise<
     }
   }
 
+  const docCount = data.uploadedDocuments?.length ?? 0;
+  const summaryInsights: string[] = [
+    `Overall compliance score: ${overallScore}%`,
+    `${gaps.filter(g => g.severity === 'critical').length} critical gaps requiring immediate attention`,
+    `${gaps.filter(g => g.severity === 'high').length} high-priority gaps to address within 30-60 days`,
+    gaps.length > 0 ? 'Prioritized action plan provided in recommendations section' : 'Strong compliance posture with minor improvement opportunities',
+  ];
+  if (docCount > 0) {
+    summaryInsights.push(`${docCount} company document(s) uploaded for full analysis — included in your assessment record.`);
+  }
+
   const result: GapAnalysisResult = {
     companyName: data.companyName || 'Your Organization',
     analysisDate: new Date().toISOString(),
@@ -329,12 +340,7 @@ export async function analyzeAssessment(data: Partial<AssessmentData>): Promise<
     criticalGaps: gaps,
     recommendations,
     potentialSavings: potentialSavings > 0 ? `$${(potentialSavings / 1000000).toFixed(1)}M - $${(potentialSavings * 1.3 / 1000000).toFixed(1)}M` : undefined,
-    summaryInsights: [
-      `Overall compliance score: ${overallScore}%`,
-      `${gaps.filter(g => g.severity === 'critical').length} critical gaps requiring immediate attention`,
-      `${gaps.filter(g => g.severity === 'high').length} high-priority gaps to address within 30-60 days`,
-      gaps.length > 0 ? 'Prioritized action plan provided in recommendations section' : 'Strong compliance posture with minor improvement opportunities',
-    ],
+    summaryInsights,
   };
 
   return result;

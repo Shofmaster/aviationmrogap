@@ -1,7 +1,7 @@
 import { PDFDocument, rgb, StandardFonts } from 'pdf-lib';
 import type { GapAnalysisResult } from '../types/assessment';
 
-export async function generatePDFReport(result: GapAnalysisResult): Promise<void> {
+export async function generatePDFReport(result: GapAnalysisResult): Promise<Uint8Array> {
   const pdfDoc = await PDFDocument.create();
   const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
   const boldFont = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
@@ -362,6 +362,8 @@ export async function generatePDFReport(result: GapAnalysisResult): Promise<void
   link.download = `${sanitizeFileName(result.companyName || 'Gap_Analysis')}_Report.pdf`;
   link.click();
   URL.revokeObjectURL(url);
+
+  return pdfBytes;
 }
 
 function wrapText(text: string, maxWidth: number, font: any, fontSize: number): string[] {
@@ -385,7 +387,7 @@ function wrapText(text: string, maxWidth: number, font: any, fontSize: number): 
   return lines;
 }
 
-function sanitizeFileName(name: string): string {
+export function sanitizeFileName(name: string): string {
   const cleaned = name
     .replace(/[\s]+/g, '_')
     .replace(/[^a-zA-Z0-9_-]/g, '')

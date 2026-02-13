@@ -13,6 +13,8 @@ export default {
           700: '#334155',
         },
         'sky-blue': '#0ea5e9',
+        'sky': '#0ea5e9',
+        'sky-light': '#38bdf8',
         'gold': '#f59e0b',
       },
       backgroundImage: {

@@ -1,91 +1,67 @@
 import { useNavigate } from 'react-router-dom';
-import { SignedIn, SignedOut, UserButton } from '@clerk/clerk-react';
 import { FaCheckCircle, FaChartLine, FaFileAlt, FaClock, FaSearch, FaTools, FaShieldAlt, FaHandshake, FaRocket, FaClipboardList } from 'react-icons/fa';
 
 export default function LandingPage() {
   const navigate = useNavigate();
 
   return (
-    <div className="min-h-screen bg-gradient-navy text-white">
-      {/* Top Nav Bar */}
-      <nav className="container mx-auto px-4 py-4 flex items-center justify-between">
-        <span className="flex items-center gap-2 text-white font-bold text-lg" style={{ fontFamily: 'Poppins, sans-serif' }}>
-          <svg width="28" height="28" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M4 20L14 6L15 16L4 20Z" fill="#0ea5e9"/>
-            <path d="M18 16L17 26L28 12L18 16Z" fill="#0ea5e9"/>
-            <line x1="13" y1="18" x2="19" y2="14" stroke="#f59e0b" strokeWidth="1.5" strokeLinecap="round"/>
-          </svg>
-          AeroGap
-        </span>
-        <div className="flex items-center gap-4">
-          <SignedOut>
-            <button
-              onClick={() => navigate('/sign-in')}
-              className="text-gray-300 hover:text-white transition-colors font-medium"
-            >
-              Sign In
-            </button>
-            <button
-              onClick={() => navigate('/sign-up')}
-              className="bg-sky-blue hover:bg-sky-blue/90 text-navy-900 font-bold px-5 py-2 rounded-lg transition-all duration-200"
-            >
-              Sign Up
-            </button>
-          </SignedOut>
-          <SignedIn>
-            <UserButton appearance={{ elements: { avatarBox: 'w-9 h-9' } }} />
-          </SignedIn>
-        </div>
-      </nav>
-
+    <div className="relative z-10 text-white">
       {/* Hero Section */}
       <div className="container mx-auto px-4 py-16">
         <div className="text-center animate-fade-in-up">
-          <h1 className="text-5xl md:text-6xl font-bold mb-6" style={{ fontFamily: 'Poppins, sans-serif' }}>
-            <span className="gradient-text">AeroGap Assessment</span>
+          <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-4 text-white" style={{ fontFamily: 'Poppins, sans-serif' }}>
+            Quality & Safety for Aviation
           </h1>
-          <p className="text-xl md:text-2xl text-gray-300 mb-8 max-w-3xl mx-auto">
-            Identify Compliance Gaps & Operational Improvements
+          <p className="text-xl md:text-2xl text-gray-300 mb-10 max-w-2xl mx-auto">
+            From single A&P to global MRO. See where you stand — in 25 minutes.
           </p>
-          <p className="text-lg text-gray-400 mb-12 max-w-2xl mx-auto">
-            Free, confidential gap analysis for aviation maintenance organizations.
-            Discover hidden revenue potential and compliance risks in just 25-30 minutes.
-          </p>
-
-          <button
-            onClick={() => navigate('/assessment')}
-            className="bg-sky-blue hover:bg-sky-blue/90 text-navy-900 font-bold text-lg px-12 py-4 rounded-lg transform hover:scale-105 transition-all duration-200 shadow-lg hover:shadow-xl"
-          >
-            Start Free Assessment
-          </button>
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+            <button
+              onClick={() => navigate('/full-assessment')}
+              className="bg-sky-blue hover:bg-sky-blue/90 text-navy-900 font-bold text-lg px-12 py-4 rounded-lg transition-all duration-200"
+            >
+              Get Full Assessment
+            </button>
+            <button
+              onClick={() => navigate('/quiz')}
+              className="border-2 border-sky-blue text-sky-blue hover:bg-sky-blue/10 font-bold text-lg px-12 py-4 rounded-lg transition-all duration-200"
+            >
+              Try Free Quick-Check
+            </button>
+          </div>
+          <p className="text-sm text-gray-500 mt-4">Confidential assessment • Professional PDF report</p>
         </div>
 
-        {/* Features Grid */}
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mt-20">
-          <FeatureCard
-            icon={<FaClock className="w-8 h-8 text-sky-blue" />}
-            title="25-30 Minutes"
-            description="Quick yet comprehensive assessment of your operations"
-          />
-          <FeatureCard
-            icon={<FaCheckCircle className="w-8 h-8 text-sky-blue" />}
-            title="13 Key Areas"
-            description="FAA Part 145, quality systems, production, and financials"
-          />
-          <FeatureCard
-            icon={<FaFileAlt className="w-8 h-8 text-sky-blue" />}
-            title="PDF Report"
-            description="Comprehensive analysis with prioritized recommendations"
-          />
-          <FeatureCard
-            icon={<FaChartLine className="w-8 h-8 text-sky-blue" />}
-            title="Actionable Insights"
-            description="Identify compliance gaps and revenue opportunities"
-          />
+        {/* About — Who We Are */}
+        <div id="about" className="mt-20 scroll-mt-20">
+          <div className="glass rounded-2xl p-10 max-w-4xl mx-auto">
+            <h2 className="text-3xl font-bold mb-6 text-center gradient-text" style={{ fontFamily: 'Poppins, sans-serif' }}>
+              Who We Are
+            </h2>
+            <p className="text-gray-300 text-center leading-relaxed mb-8 max-w-2xl mx-auto">
+              AeroGap is an aviation quality and compliance consulting practice focused on maintenance organizations worldwide.
+              We work with repair stations, MROs, and flight departments to close gaps in regulatory compliance, quality systems, and operations —
+              so you can reduce risk, stay audit-ready, and capture revenue you might be leaving on the table.
+            </p>
+            <div className="grid md:grid-cols-3 gap-6 text-center">
+              <div>
+                <p className="text-sky-blue font-bold text-lg mb-1">Repair Stations</p>
+                <p className="text-gray-400 text-sm">Part 145, EASA Part-145, and international equivalents</p>
+              </div>
+              <div>
+                <p className="text-sky-blue font-bold text-lg mb-1">MROs</p>
+                <p className="text-gray-400 text-sm">Single-site to global maintenance providers</p>
+              </div>
+              <div>
+                <p className="text-sky-blue font-bold text-lg mb-1">Flight Departments</p>
+                <p className="text-gray-400 text-sm">Corporate, charter, and operator maintenance teams</p>
+              </div>
+            </div>
+          </div>
         </div>
 
         {/* What We Do Section */}
-        <div className="mt-20">
+        <div id="what-we-do" className="mt-20 scroll-mt-20">
           <h2 className="text-3xl font-bold mb-4 text-center gradient-text" style={{ fontFamily: 'Poppins, sans-serif' }}>
             What We Do
           </h2>
@@ -128,7 +104,7 @@ export default function LandingPage() {
         </div>
 
         {/* Why It Matters Section */}
-        <div className="glass rounded-2xl p-10 mt-20 max-w-4xl mx-auto">
+        <div id="why-it-matters" className="glass rounded-2xl p-10 mt-20 max-w-4xl mx-auto scroll-mt-20">
           <h2 className="text-3xl font-bold mb-6 text-center gradient-gold" style={{ fontFamily: 'Poppins, sans-serif' }}>
             Why It Matters
           </h2>
@@ -160,8 +136,40 @@ export default function LandingPage() {
           </div>
         </div>
 
-        {/* What You'll Get Section */}
-        <div className="glass rounded-2xl p-10 mt-20 max-w-4xl mx-auto">
+        {/* Our Assessment / Get a Snapshot of Your Gaps */}
+        <div id="assessment" className="mt-20 scroll-mt-20">
+          <h2 className="text-3xl font-bold mb-4 text-center gradient-text" style={{ fontFamily: 'Poppins, sans-serif' }}>
+            Get a Snapshot of Your Gaps
+          </h2>
+          <p className="text-gray-400 text-center max-w-2xl mx-auto mb-12">
+            Our confidential online assessment is one way to see how we can help — 25–30 minutes, 13 key areas, and a professional PDF report with prioritized recommendations.
+          </p>
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <FeatureCard
+              icon={<FaClock className="w-8 h-8 text-sky-blue" />}
+              title="25-30 Minutes"
+              description="Quick yet comprehensive assessment of your operations"
+            />
+            <FeatureCard
+              icon={<FaCheckCircle className="w-8 h-8 text-sky-blue" />}
+              title="13 Key Areas"
+              description="FAA Part 145, quality systems, production, and financials"
+            />
+            <FeatureCard
+              icon={<FaFileAlt className="w-8 h-8 text-sky-blue" />}
+              title="PDF Report"
+              description="Comprehensive analysis with prioritized recommendations"
+            />
+            <FeatureCard
+              icon={<FaChartLine className="w-8 h-8 text-sky-blue" />}
+              title="Actionable Insights"
+              description="Identify compliance gaps and revenue opportunities"
+            />
+          </div>
+        </div>
+
+        {/* What You'll Receive — Benefit list */}
+        <div id="what-you-receive" className="glass rounded-2xl p-10 mt-20 max-w-4xl mx-auto scroll-mt-20">
           <h2 className="text-3xl font-bold mb-8 text-center gradient-gold" style={{ fontFamily: 'Poppins, sans-serif' }}>
             What You'll Receive
           </h2>
@@ -174,8 +182,8 @@ export default function LandingPage() {
           </div>
         </div>
 
-        {/* Assessment Coverage Section */}
-        <div className="mt-20">
+        {/* Assessment Coverage Areas */}
+        <div id="coverage-areas" className="mt-20 scroll-mt-20">
           <h2 className="text-3xl font-bold mb-12 text-center gradient-text" style={{ fontFamily: 'Poppins, sans-serif' }}>
             Assessment Coverage Areas
           </h2>
@@ -227,21 +235,15 @@ export default function LandingPage() {
             compliance gaps and unlocked hidden revenue potential.
           </p>
           <button
-            onClick={() => navigate('/assessment')}
+            onClick={() => navigate('/full-assessment')}
             className="bg-gold hover:bg-gold/90 text-navy-900 font-bold text-lg px-12 py-4 rounded-lg transform hover:scale-105 transition-all duration-200 shadow-lg hover:shadow-xl"
           >
-            Begin Assessment Now
+            Get Full Assessment
           </button>
           <p className="text-sm text-gray-400 mt-4">
-            100% Free • Completely Confidential • No Credit Card Required
+            Completely Confidential • Professional PDF Report
           </p>
         </div>
-
-        {/* Footer */}
-        <div className="mt-16 text-center text-gray-400 text-sm">
-          <p>&copy; 2026 AeroGap. All rights reserved.</p>
-        </div>
-      </div>
     </div>
   );
 }

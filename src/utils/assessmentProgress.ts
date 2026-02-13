@@ -3,20 +3,22 @@ import type { AssessmentData } from '../types/assessment';
 type AssessmentField = keyof AssessmentData;
 
 // Fields that belong to each section, used to calculate completion/progress.
+// Section 0 = Upload Documents (optional); 1 = Company Info; 2–13 = rest.
 const SECTION_FIELDS: Record<number, AssessmentField[]> = {
-  0: ['companyName', 'location', 'employeeCount', 'annualRevenue', 'contactName', 'contactEmail', 'contactPhone'],
-  1: ['certifications', 'as9100Rev', 'argusLevel', 'isbaoStage', 'wyvernLevel'],
-  2: ['aircraftCategories', 'specificAircraftTypes', 'servicesOffered', 'mechanicCount', 'hangarCapabilities', 'oemAuthorizations', 'specialCapabilities'],
-  3: ['maintenanceTrackingSoftware', 'softwareSatisfaction', 'hasDefinedProcess', 'processDocumented', 'processFollowed', 'processEffectiveness'],
-  4: ['partsInventoryMethod', 'partsTrackingSystem', 'inventoryAccuracy', 'shelfLifeTracking'],
-  5: ['qualityMethodologies', 'continuousImprovementActive', 'toolControlMethod', 'toolControlDescription', 'toolControlErrors', 'toolControlErrorFrequency'],
-  6: ['hasSMS', 'smsProgram', 'smsMaturity', 'challenges'],
-  7: ['trainingProgramType', 'trainingTracking', 'initialTrainingDuration', 'recurrentTrainingFrequency', 'competencyVerification', 'timeToCompetency'],
-  8: ['calibrationProgram', 'calibrationTracking', 'overdueCalibrations', 'outOfToleranceFrequency', 'outOfToleranceResponse'],
-  9: ['capaSystemStatus', 'discrepancyTracking', 'capaClosureTime', 'repeatDiscrepancies', 'capaAuthority'],
-  10: ['lastFAASurveillance', 'auditSurveillance', 'auditFindingsCount', 'findingSeverity', 'recurringFindings', 'findingClosureStatus', 'certificateActions', 'auditHistory', 'upcomingAudits'],
-  11: ['workOrderSystem', 'scheduleAdherence', 'productionBottlenecks', 'wipVisibility', 'routineInspectionDays', 'typicalRepairDays', 'majorOverhaulDays', 'capacityUtilization', 'productionPlanning'],
-  12: ['firstPassRate', 'warrantyRate', 'repeatMaintenanceRate', 'reworkRate', 'jobMargin', 'revenuePerTech', 'scrapReworkCost', 'partsWaitDays', 'inspectionWaitHours', 'approvalTurnaroundDays', 'turnoverRate', 'specificConcerns'],
+  0: ['uploadedDocuments'], // optional; completion based on whether any docs uploaded
+  1: ['companyName', 'location', 'employeeCount', 'annualRevenue', 'contactName', 'contactEmail', 'contactPhone'],
+  2: ['certifications', 'as9100Rev', 'argusLevel', 'isbaoStage', 'wyvernLevel'],
+  3: ['aircraftCategories', 'specificAircraftTypes', 'servicesOffered', 'mechanicCount', 'hangarCapabilities', 'oemAuthorizations', 'specialCapabilities'],
+  4: ['maintenanceTrackingSoftware', 'softwareSatisfaction', 'hasDefinedProcess', 'processDocumented', 'processFollowed', 'processEffectiveness'],
+  5: ['partsInventoryMethod', 'partsTrackingSystem', 'inventoryAccuracy', 'shelfLifeTracking'],
+  6: ['qualityMethodologies', 'continuousImprovementActive', 'toolControlMethod', 'toolControlDescription', 'toolControlErrors', 'toolControlErrorFrequency'],
+  7: ['hasSMS', 'smsProgram', 'smsMaturity', 'challenges'],
+  8: ['trainingProgramType', 'trainingTracking', 'initialTrainingDuration', 'recurrentTrainingFrequency', 'competencyVerification', 'timeToCompetency'],
+  9: ['calibrationProgram', 'calibrationTracking', 'overdueCalibrations', 'outOfToleranceFrequency', 'outOfToleranceResponse'],
+  10: ['capaSystemStatus', 'discrepancyTracking', 'capaClosureTime', 'repeatDiscrepancies', 'capaAuthority'],
+  11: ['lastFAASurveillance', 'auditSurveillance', 'auditFindingsCount', 'findingSeverity', 'recurringFindings', 'findingClosureStatus', 'certificateActions', 'auditHistory', 'upcomingAudits'],
+  12: ['workOrderSystem', 'scheduleAdherence', 'productionBottlenecks', 'wipVisibility', 'routineInspectionDays', 'typicalRepairDays', 'majorOverhaulDays', 'capacityUtilization', 'productionPlanning'],
+  13: ['firstPassRate', 'warrantyRate', 'repeatMaintenanceRate', 'reworkRate', 'jobMargin', 'revenuePerTech', 'scrapReworkCost', 'partsWaitDays', 'inspectionWaitHours', 'approvalTurnaroundDays', 'turnoverRate', 'specificConcerns'],
 };
 
 export function isFieldFilled(value: unknown): boolean {
@@ -31,7 +33,10 @@ function getRelevantSectionFields(data: Partial<AssessmentData>, sectionId: numb
   if (!fields || fields.length === 0) return [];
 
   switch (sectionId) {
-    case 1: {
+    case 0:
+      // Upload section is optional; no required fields for progress
+      return [];
+    case 2: {
       const selectedCertifications = (data.certifications || []).filter((cert) => cert !== 'None');
 
       return fields.filter((field) => {
@@ -42,16 +47,16 @@ function getRelevantSectionFields(data: Partial<AssessmentData>, sectionId: numb
         return true;
       });
     }
-    case 5: {
+    case 6: {
       if (data.toolControlErrors === 'Yes') return fields;
       return fields.filter((field) => field !== 'toolControlErrorFrequency');
     }
-    case 6: {
+    case 7: {
       const showSmsDetails = data.hasSMS === 'Yes' || data.hasSMS === 'In Development';
       if (showSmsDetails) return fields;
       return fields.filter((field) => field !== 'smsProgram' && field !== 'smsMaturity');
     }
-    case 10: {
+    case 11: {
       const selectedCertifications = (data.certifications || []).filter((cert) => cert !== 'None');
       const hasSelectedCertifications = selectedCertifications.length > 0;
 
